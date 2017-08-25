@@ -43,7 +43,7 @@ void displaySquare(int x,int y, int edge)
 	glBegin(GL_LINE_LOOP);
 	glColor3d(255,0,0);
 	glVertex2d(x-tmp, y+tmp);
-	glVertex2d(x+tmp, y+tmp);
+	glVertex2d(x+tmp, y+tmp);g
 	glVertex2d(x+tmp, y-tmp);
 	glVertex2d(x-tmp, y-tmp);
 	glEnd();
@@ -92,6 +92,24 @@ void displayCircles2(int number_circles,int red_radio){
 		tmp_radio=radio_default;
 		
 	}
+}	
+
+// 5) dibuja circulos de mayor a menor icontinuos con angulo
+void displayCircles2(int number_circles,int red_radio){
+	/* float radio_default=10;
+	float tmp_radio=radio_default;
+	int x=-40;y=0;
+	displayCircle(x,y,radio_default); 
+	radio_default-=red_radio; // no perder radio para avanzar
+	
+	for( int i=1; i<number_circles;i++,radio_default-=red_radio){
+		if(radio_default<0) break;
+		
+		x+=tmp_radio+radio_default;// suma de radio anterior y actual
+		displayCircle(x,y,radio_default);
+		tmp_radio=radio_default;
+		
+	} */
 }	
 
 
