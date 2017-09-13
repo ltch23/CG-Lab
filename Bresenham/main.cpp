@@ -1,11 +1,26 @@
-#include <algorithm>
-#include <iostream>
+#define GLUT_DISABLE_ATEXIT_HACK	
+#include <math.h>
 #include <GL/glut.h>
+#include <iostream>
 
-int ww = 600, wh = 400;
+#define KEY_ESC 27
+
 int xi, yi, xf, yf;
 
 using namespace std;
+
+//dibuja un simple gizmo
+void displayGizmo()
+{
+	glBegin(GL_LINES);
+	glColor3d(255,0,0);
+	glVertex2d(0, 0);
+	glVertex2d(400, 0);
+	glColor3d(0, 255, 0);
+	glVertex2d(0, 0);
+	glVertex2d(0, 400);
+	glEnd();
+}
 
 void setPixel(int x, int y)
 {
@@ -87,90 +102,132 @@ void bresenham(int x0, int y0, int x1, int y1)
 bool firstClick = true;
 // bool firstClick2 = true;
 bool drawLine = false;
-// bool drawLine2 = false;
 
-void mouse(int btn, int state, int x, int y)
+
+void OnMouseClick(int button, int state, int x, int y)
 {
-    if( btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN ) {
-        if (firstClick) {
-            firstClick= not firstClick;
-        }
+  if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) 
+  { 
+     //hacer algo x,z
+     if (firstClick) {
+        firstClick= not firstClick;
     }
+  }	
 }
 
-void mouse2( int x, int y)
+void OnMouseMotion(int x, int y)
 {
-    cout<<"x: "<<x<<",y: "<<y<<endl;
+     //hacer algo x,z
+     cout<<"x: "<<x<<",y: "<<y<<endl;
+     
+     if (!firstClick) {
+         xi = x;
+         yi = (800 - y);
+         firstClick = true;
+         drawLine = false;
+     }
+     else {
+         xf = x;
+         yf = (800 - y);
+         // firstClick = true;
+         drawLine = true;
+         // firstClick2=true;
+     }
+     if( drawLine )
+     {
+         bresenham(xi, yi, xf, yf);
+     }
+     glFlush();
+ 
+ 
+     glutPostRedisplay();
+}
+
+
+
+void idle(){ // AGREGAR ESTA FUNCION
+	glutPostRedisplay(); 
+}
+
+//funcion llamada a cada imagen
+void glPaint(void) {
+
+	//El fondo de la escena al color initial
+	// glClear(GL_COLOR_BUFFER_BIT); //CAMBIO
+	// glLoadIdentity();
+	// glOrtho(-400.0f,  400.0f,-400.0f, 400.0f, -1.0f, 1.0f); 
+	
+	
+	// //dibuja el gizmo
+	// displayGizmo();
+
+	// //doble buffer, mantener esta instruccion al fin de la funcion
+    // glutSwapBuffers();
     
-    if (!firstClick) {
-        xi = x;
-        yi = (wh - y);
-        firstClick = true;
-        drawLine = false;
-    }
-    else {
-        xf = x;
-        yf = (wh - y);
-        // firstClick = true;
-        drawLine = true;
-        // firstClick2=true;
-    }
-    if( drawLine )
-    {
-        bresenham(xi, yi, xf, yf);
-    }
-    glFlush();
-
-
-    glutPostRedisplay();
-}
-
-
-
-// Keyboard input processing routine.
-void keyInput(unsigned char key, int x, int y)
-{
-    switch (key)
-    {
-    case 27: // Press escape to exit.
-        exit(0);
-        break;
-    default:
-        break;
-    }
-}
-
-// Drawing (display) routine.
-void drawScene(void)
-{
     glClearColor(0, 0,0,0); // Set foreground color
     glColor3f(0.1, 0.2, 0.2); // Clear screen to background color.
     glClear(GL_COLOR_BUFFER_BIT);   //Flush created objects to the screen, i.e., force rendering.
+
 }
 
-// OpenGL window reshape routine.
-void setup()
-{
-    glViewport(0, 0, ww, wh); // Set viewport size to be entire OpenGL window.
-    glMatrixMode(GL_PROJECTION); // Set matrix mode to projection.
-    glLoadIdentity(); // Clear current projection matrix to identity.
-    gluOrtho2D(0.0, (GLdouble)ww, 0.0, (GLdouble)wh); // Specify the orthographic (or perpendicular) projection, i.e., define the viewing box.
-    glMatrixMode(GL_MODELVIEW); // Set matrix mode to modelview.
+GLvoid window_redraw(GLsizei width, GLsizei height) {
+	glViewport(0, 0, width, height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+    gluOrtho2D(0.0, (GLdouble)width, 0.0, (GLdouble)height); // Specify the orthographic (or perpendicular) projection, i.e., define the viewing box.
+    
+	// glOrtho(-400.0f,  400.0f,-400.0f, 400.0f, -1.0f, 1.0f); 
+	// todas la informaciones previas se aplican al la matrice del ModelView
+	glMatrixMode(GL_MODELVIEW);
 }
 
-// Main routine: defines window properties, creates window, registers callback routines and begins processing.
-int main(int argc, char **argv)
-{
-    glutInit(&argc, argv); // Initialize GLUT.
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB); // Set display mode as single-buffered and RGB color.
-    glutInitWindowSize(ww, wh); // Set OpenGL window size.
-    glutInitWindowPosition(100, 100); // Set position of OpenGL window upper-left corner.
-    glutCreateWindow("Bresenham"); // Create OpenGL window with title.
-    glutDisplayFunc(drawScene); // Register display routine.
-    setup(); // Register reshape routine.
-    glutKeyboardFunc(keyInput); // Register keyboard routine.
-    glutMouseFunc(mouse); // Begin processing.
-    glutMotionFunc(mouse2); // Begin processing.
-    glutMainLoop();
-    return 0;
+//
+//inicializacion de OpenGL
+//
+void init_GL(void) {
+	//Color del fondo de la escena
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //(R, G, B, transparencia) en este caso un fondo negro
+
+	//modo projeccion 
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+}
+
+
+GLvoid window_key(unsigned char key, int x, int y) {
+	switch (key) {
+	case KEY_ESC:
+		exit(0);
+		break;
+
+	default:
+		break;
+	}
+
+}
+//
+//el programa principal
+//
+int main(int argc, char** argv) {
+
+	//Inicializacion de la GLUT
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+	glutInitWindowSize(800, 800); //tamaño de la ventana
+	glutInitWindowPosition(100, 100); //posicion de la ventana
+	glutCreateWindow("TP2 bis OpenGL : Bresenham"); //titulo de la ventana
+
+	init_GL(); //funcion de inicializacion de OpenGL
+
+	glutDisplayFunc(glPaint); 
+	glutReshapeFunc(&window_redraw);
+	// Callback del teclado
+	glutKeyboardFunc(&window_key);
+	glutMouseFunc(&OnMouseClick);
+	glutMotionFunc(&OnMouseMotion);
+	glutIdleFunc(&idle);
+
+	glutMainLoop(); //bucle de rendering
+
+	return 0;
 }
