@@ -88,9 +88,71 @@ bool triangle::rasterize(camera* __camera, unsigned short __w, unsigned short __
     // Esto es: trazar la linea entre __pv1 y __pv2,
     // entre __pv1 y __pv3; y entre __pv2 y __pv3
 
-    draw_point(__pv1, __w, __h, __color_buffer);
-    draw_point(__pv2, __w, __h, __color_buffer);
-    draw_point(__pv3, __w, __h, __color_buffer);
+    cout<<"x1: "<<__pv1[0]<<"y1: "<<__pv1[1]<<endl;
+    cout<<"x2 : "<<__pv2[0]<<"y2: "<<__pv2[1]<<endl;
+
+    int dx = abs(__pv2[0] - __pv1[0]);
+    int dy = abs(__pv2[1] - __pv1[1]);
+    
+    if (dx >= dy){
+    
+        int i, j, k;
+        
+        i = 2 * dy - dx;
+        j = 2 * dy;
+        k = 2 * (dy - dx);
+        if (!(__pv1[0] < __pv2[0])) {
+            swap(__pv1[0], __pv2[0]);
+            swap(__pv1[1], __pv2[1]);
+        }
+        draw_point(__pv1, __w, __h, __color_buffer);
+        
+        while (__pv1[0] < __pv2[0]) {
+            if (i < 0)
+            i += j;
+            else {
+                if (__pv1[1] < __pv2[1])
+                ++__pv1[1];
+                else
+                --__pv1[1];
+                i += k;
+            }
+            ++__pv1[0];
+            draw_point(__pv1, __w, __h, __color_buffer);
+        }
+    }
+            
+    else{
+        
+        int i, j, k;
+        
+        i = 2 * dx - dy;
+        j = 2 * dx;
+        k = 2 * (dx - dy);
+        if (!(__pv1[1] < __pv2[1])) {
+            swap(__pv1[0], __pv2[0]);
+            swap(__pv1[1], __pv2[1]);
+        }
+        draw_point(__pv1, __w, __h, __color_buffer);
+        while (__pv1[1] < __pv2[1]) {
+            if (i < 0)
+            i += j;
+            else {
+                if (__pv1[0] > __pv2[0])
+                --__pv1[0];
+                else
+                ++__pv1[0];
+                i += k;
+            }
+            ++__pv1[1];
+        draw_point(__pv1, __w, __h, __color_buffer);
+        }
+        }
+            
+          
+    // draw_point(__pv1, __w, __h, __color_buffer);
+    // draw_point(__pv2, __w, __h, __color_buffer);
+    // draw_point(__pv3, __w, __h, __color_buffer);
 
     // everything is alright
     return true;

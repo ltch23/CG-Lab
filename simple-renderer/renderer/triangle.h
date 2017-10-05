@@ -1,7 +1,10 @@
 #ifndef _TRIANGLE_H_
 #define _TRIANGLE_H_
 
+#include <iostream>
 #include "object.h"
+
+using namespace std;
 
 //! triangle
 class triangle: public object {
