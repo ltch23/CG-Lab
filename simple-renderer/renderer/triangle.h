@@ -20,7 +20,8 @@ public:
 
     //! draw_points
     void draw_point(vector<2> p, unsigned int __w, unsigned int __h, float*& __color_buffer);
-
+    void bresenham(vector<2> pv1, vector<2> pv2,unsigned int __w, unsigned int __h, float*& __color_buffer);
+        
 protected:
     //! vertex 1
     vector<3> _v1;

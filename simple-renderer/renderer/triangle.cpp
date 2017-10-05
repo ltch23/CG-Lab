@@ -83,71 +83,16 @@ bool triangle::rasterize(camera* __camera, unsigned short __w, unsigned short __
     __pv3[1] += 5.f;
     __pv3[1] *= __h / 10.f;
 
+    
+     bresenham(__pv1,__pv2,__w, __h, __color_buffer);
+     bresenham(__pv2,__pv3,__w, __h, __color_buffer);
+     bresenham(__pv3,__pv1,__w, __h, __color_buffer);
+
     // RELLENAR AQUI BRESENHAM para trazar
     // las lineas entre los puntos __pv1, __pv2 y __pv3
     // Esto es: trazar la linea entre __pv1 y __pv2,
     // entre __pv1 y __pv3; y entre __pv2 y __pv3
 
-    cout<<"x1: "<<__pv1[0]<<"y1: "<<__pv1[1]<<endl;
-    cout<<"x2 : "<<__pv2[0]<<"y2: "<<__pv2[1]<<endl;
-
-    int dx = abs(__pv2[0] - __pv1[0]);
-    int dy = abs(__pv2[1] - __pv1[1]);
-    
-    if (dx >= dy){
-    
-        int i, j, k;
-        
-        i = 2 * dy - dx;
-        j = 2 * dy;
-        k = 2 * (dy - dx);
-        if (!(__pv1[0] < __pv2[0])) {
-            swap(__pv1[0], __pv2[0]);
-            swap(__pv1[1], __pv2[1]);
-        }
-        draw_point(__pv1, __w, __h, __color_buffer);
-        
-        while (__pv1[0] < __pv2[0]) {
-            if (i < 0)
-            i += j;
-            else {
-                if (__pv1[1] < __pv2[1])
-                ++__pv1[1];
-                else
-                --__pv1[1];
-                i += k;
-            }
-            ++__pv1[0];
-            draw_point(__pv1, __w, __h, __color_buffer);
-        }
-    }
-            
-    else{
-        
-        int i, j, k;
-        
-        i = 2 * dx - dy;
-        j = 2 * dx;
-        k = 2 * (dx - dy);
-        if (!(__pv1[1] < __pv2[1])) {
-            swap(__pv1[0], __pv2[0]);
-            swap(__pv1[1], __pv2[1]);
-        }
-        draw_point(__pv1, __w, __h, __color_buffer);
-        while (__pv1[1] < __pv2[1]) {
-            if (i < 0)
-            i += j;
-            else {
-                if (__pv1[0] > __pv2[0])
-                --__pv1[0];
-                else
-                ++__pv1[0];
-                i += k;
-            }
-            ++__pv1[1];
-        draw_point(__pv1, __w, __h, __color_buffer);
-        }
-        }
             
           
     // draw_point(__pv1, __w, __h, __color_buffer);
@@ -166,4 +111,72 @@ void triangle::draw_point(vector<2> p, unsigned int __w, unsigned int __h, float
     __color_buffer[(__y * __w + __x) * 4 + 2] = _material._color[2];
     __color_buffer[(__y * __w + __x) * 4 + 3] = _material._color[3];
 }
+
+void triangle::bresenham(vector<2> pv1, vector<2> pv2,unsigned int __w, unsigned int __h, float*& __color_buffer){
+
+    // cout<<"x1: "<<pv1[0]<<" - y1: "<<pv1[1]<<endl;
+    // cout<<"x2 : "<<pv2[0]<<" - y2: "<<pv2[1]<<endl;
+
+    int dx = abs(pv2[0] - pv1[0]);
+    int dy = abs(pv2[1] - pv1[1]);
+
+    if (dx >= dy){
+
+        int i, j, k;
+        
+        i = 2 * dy - dx;
+        j = 2 * dy;
+        k = 2 * (dy - dx);
+        if (!(pv1[0] < pv2[0])) {
+            swap(pv1[0], pv2[0]);
+            swap(pv1[1], pv2[1]);
+        }
+        draw_point(pv1, __w, __h, __color_buffer);
+        
+        while (pv1[0] < pv2[0]) {
+            if (i < 0)
+            i += j;
+            else {
+                if (pv1[1] < pv2[1])
+                ++pv1[1];
+                else
+                --pv1[1];
+                i += k;
+            }
+            ++pv1[0];
+            draw_point(pv1, __w, __h, __color_buffer);
+        }
+    }
+            
+    else{
+        
+        int i, j, k;
+        
+        i = 2 * dx - dy;
+        j = 2 * dx;
+        k = 2 * (dx - dy);
+        if (!(pv1[1] < pv2[1])) {
+            swap(pv1[0], pv2[0]);
+            swap(pv1[1], pv2[1]);
+        }
+        draw_point(pv1, __w, __h, __color_buffer);
+        while (pv1[1] < pv2[1]) {
+            if (i < 0)
+            i += j;
+            else {
+                if (pv1[0] > pv2[0])
+                --pv1[0];
+                else
+                ++pv1[0];
+                i += k;
+            }
+            ++pv1[1];
+        draw_point(pv1, __w, __h, __color_buffer);
+        }
+    }
+    
+}
+
+
+
 

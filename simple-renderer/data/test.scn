@@ -40,13 +40,14 @@
 
 			[object]
 				name 	triangle
-				vertices 	0.0 	0.0 	0.0	1.0	0.0	0.0	1.0	1.0	0.0
+				vertices 	0.0 1.0 3.0 	0.0 3.0 1.0		0.0	3.3	3.3 		
 				refractive	0.0
 				reflective	0.3
 				shinniness	45
 				ior 	1.05
-				rgb	0.2	0.2	0.8
+				rgb	0.0	1.0	0.0
 			[/object]
+
 		[/transformation]
 	[/transformation]
 
