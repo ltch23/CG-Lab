@@ -1,5 +1,10 @@
 #include "triangle.h"
+#include <utility>
 // constructor
+
+
+
+
 triangle::triangle(matrix<4, 4>& __t, material &__material, vector<3> __v1, vector<3> __v2,
         vector<3> __v3) :
         object(__t, __material) {
@@ -84,20 +89,32 @@ bool triangle::rasterize(camera* __camera, unsigned short __w, unsigned short __
     __pv3[1] *= __h / 10.f;
 
     
-     bresenham(__pv1,__pv2,__w, __h, __color_buffer);
-     bresenham(__pv2,__pv3,__w, __h, __color_buffer);
-     bresenham(__pv3,__pv1,__w, __h, __color_buffer);
-
-    // RELLENAR AQUI BRESENHAM para trazar
-    // las lineas entre los puntos __pv1, __pv2 y __pv3
-    // Esto es: trazar la linea entre __pv1 y __pv2,
-    // entre __pv1 y __pv3; y entre __pv2 y __pv3
-
-            
-          
     // draw_point(__pv1, __w, __h, __color_buffer);
     // draw_point(__pv2, __w, __h, __color_buffer);
     // draw_point(__pv3, __w, __h, __color_buffer);
+     
+    // RELLENAR AQUI BRESENHAM para trazar
+    // las lineas entre los puntos __pv1, __pv2 y __pv3
+    // cout<<"bresenham pv1"<<endl;
+    bresenham(__pv1,__pv2,__w, __h, __color_buffer);
+    // Esto es: trazar la linea entre __pv1 y __pv2,
+    cout<<"bresenham pv2"<<endl;
+    bresenham(__pv2,__pv3,__w, __h, __color_buffer);
+    // entre __pv1 y __pv3; y entre __pv2 y __pv3
+    cout<<"bresenham pv3"<<endl;
+    bresenham(__pv3,__pv1,__w, __h, __color_buffer);
+
+    cout<<"*************************************"<<endl;
+    cout<<"p1: "<<__pv1[0]<<" - "<<__pv1[1]<<endl;    
+    cout<<"p2: "<<__pv2[0]<<" - "<<__pv2[1]<<endl;    
+    cout<<"p3: "<<__pv3[0]<<" - "<<__pv3[1]<<endl;    
+    cout<<"*************************************"<<endl;
+
+    draw_polygon(__pv1,__pv2,__pv3,__w, __h, __color_buffer);
+    // scan_line( __pv1,__pv2,__pv3 ,__w,  __h, __color_buffer);
+        
+            
+          
 
     // everything is alright
     return true;
@@ -106,11 +123,15 @@ bool triangle::rasterize(camera* __camera, unsigned short __w, unsigned short __
 void triangle::draw_point(vector<2> p, unsigned int __w, unsigned int __h, float*& __color_buffer) {
     int __x = p[0];
     int __y = p[1];
+    // cout<<"x: "<<__x<<" y: "<<__y<<endl;
     __color_buffer[(__y * __w + __x) * 4 + 0] = _material._color[0];
     __color_buffer[(__y * __w + __x) * 4 + 1] = _material._color[1];
     __color_buffer[(__y * __w + __x) * 4 + 2] = _material._color[2];
     __color_buffer[(__y * __w + __x) * 4 + 3] = _material._color[3];
 }
+
+
+
 
 void triangle::bresenham(vector<2> pv1, vector<2> pv2,unsigned int __w, unsigned int __h, float*& __color_buffer){
 
@@ -121,12 +142,10 @@ void triangle::bresenham(vector<2> pv1, vector<2> pv2,unsigned int __w, unsigned
     int dy = abs(pv2[1] - pv1[1]);
 
     if (dx >= dy){
-
         int i, j, k;
-        
-        i = 2 * dy - dx;
-        j = 2 * dy;
-        k = 2 * (dy - dx);
+        i = 2*dy-dx;
+        j = 2*dy;
+        k = 2*(dy-dx);
         if (!(pv1[0] < pv2[0])) {
             swap(pv1[0], pv2[0]);
             swap(pv1[1], pv2[1]);
@@ -138,12 +157,12 @@ void triangle::bresenham(vector<2> pv1, vector<2> pv2,unsigned int __w, unsigned
             i += j;
             else {
                 if (pv1[1] < pv2[1])
-                ++pv1[1];
+                pv1[1]++;
                 else
-                --pv1[1];
+                pv1[1]--;
                 i += k;
             }
-            ++pv1[0];
+            pv1[0]++;
             draw_point(pv1, __w, __h, __color_buffer);
         }
     }
@@ -152,9 +171,9 @@ void triangle::bresenham(vector<2> pv1, vector<2> pv2,unsigned int __w, unsigned
         
         int i, j, k;
         
-        i = 2 * dx - dy;
-        j = 2 * dx;
-        k = 2 * (dx - dy);
+        i = 2*dx-dy;
+        j = 2*dx;
+        k = 2*(dx-dy);
         if (!(pv1[1] < pv2[1])) {
             swap(pv1[0], pv2[0]);
             swap(pv1[1], pv2[1]);
@@ -164,13 +183,13 @@ void triangle::bresenham(vector<2> pv1, vector<2> pv2,unsigned int __w, unsigned
             if (i < 0)
             i += j;
             else {
-                if (pv1[0] > pv2[0])
-                --pv1[0];
+                if (pv1[0] < pv2[0])
+                pv1[0]++;
                 else
-                ++pv1[0];
+                pv1[0]--;
                 i += k;
             }
-            ++pv1[1];
+            pv1[1]++;
         draw_point(pv1, __w, __h, __color_buffer);
         }
     }
@@ -180,3 +199,90 @@ void triangle::bresenham(vector<2> pv1, vector<2> pv2,unsigned int __w, unsigned
 
 
 
+
+void triangle::draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned int __w, unsigned int __h, float*& __color_buffer){
+    
+        
+    int p[4][4];
+    int inter[4],x,y;
+    int xmin,ymin,xmax,ymax;
+    
+    p[0][0]=p1[0];
+    p[0][1]=p1[1];
+    p[1][0]=p2[0];
+    p[1][1]=p2[1];
+    p[2][0]=p3[0];
+    p[2][1]=p3[1];
+
+    p[3][0]=p[0][0];
+    p[3][1]=p[0][1];
+    xmin=xmax=p[0][0];
+    ymin=ymax=p[0][1];
+
+
+    for(int i=0;i<3;i++){
+        if(xmin>p[i][0])
+        xmin=p[i][0];
+        if(xmax<p[i][0])
+        xmax=p[i][0];
+        if(ymin>p[i][1])
+        ymin=p[i][1];
+        if(ymax<p[i][1])
+        ymax=p[i][1];
+    }
+    
+    
+    float z=ymin+0.1;
+
+    while(z<=ymax){
+
+        int x1,x2,y1,y2,temp;
+        int c=0;
+        for(int i=0;i<3;i++)
+        {
+            x1=p[i][0];
+            y1=p[i][1];
+            x2=p[i+1][0];
+            y2=p[i+1][1];
+            if(y2<y1)
+            {
+                temp=x1;
+                x1=x2;
+                x2=temp;
+                temp=y1;
+                y1=y2;
+                y2=temp;
+            }
+            if(z<=y2&&z>=y1)
+            {
+                if((y1-y2)==0)
+                x=x1;
+                else{ // used to make changes in x. so that we can fill our polygon after cerain distance
+                    x=((x2-x1)*(z-y1))/(y2-y1);
+                    x=x+x1;
+                }
+                if(x<=xmax && x>=xmin)
+                inter[c++]=x;
+            }
+        }
+
+        //SORT FUNCTION
+        int j,i;
+
+        // for(i=0;i<3;i++){
+        //     cout<<p[i][0]<<","<<p[i][1]<<"-"<<p[i+1][0]<<","<<p[i+1][1]<<endl;
+        // }
+
+        cout<<endl;
+        for(int i=0; i<c;i+=2){
+            for(int j=inter[i];j<=inter[i+1];j++){
+                cout<<"x: "<<j<<", "<<int(z)<<endl;
+                p1[0]=j;
+                p1[1]=int(z);
+                draw_point(p1, __w, __h, __color_buffer);
+                
+            }
+        }
+        z++; 
+    }
+    }
