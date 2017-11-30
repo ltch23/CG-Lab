@@ -70,67 +70,154 @@ bool triangle::rasterize(camera* __camera, unsigned short __w, unsigned short __
     __v1 = __ww * (__v1 - __camera->pos());
     __v2 = __ww * (__v2 - __camera->pos());
     __v3 = __ww * (__v3 - __camera->pos());
+    //
+    
 
+    // cout<<"vs"<<endl;
+    // for (int j = 0; j < 4; j++)
+    //     cout << __v1[j] << " ";
+    // cout << endl;
+    // for (int j = 0; j < 4; j++)
+    //     cout << __v2[j] << " ";
+    // cout << endl;
+    // for (int j = 0; j < 4; j++)
+    //     cout << __v3[j] << " ";
+    // cout << endl;
+
+    /* ******************** */
     // orthogonal projection
-    vector<2> __pv1;
-    __pv1[0] = __v1[0];
-    __pv1[1] = __v1[1];
-    vector<2> __pv2;
-    __pv2[0] = __v2[0];
-    __pv2[1] = __v2[1];
-    vector<2> __pv3;
-    __pv3[0] = __v3[0];
-    __pv3[1] = __v3[1];
+    // vector<2> __pv1;
+    // __pv1[0] = __v1[0];
+    // __pv1[1] = __v1[1];
+    // vector<2> __pv2;
+    // __pv2[0] = __v2[0];
+    // __pv2[1] = __v2[1];
+    // vector<2> __pv3;
+    // __pv3[0] = __v3[0];
+    // __pv3[1] = __v3[1];
 
-    // simulating a frustrum
-    __pv1[0] += 5.f;
-    __pv1[0] *= __w / 10.f;
-    __pv1[1] += 5.f;
-    __pv1[1] *= __h / 10.f;
-    __pv2[0] += 5.f;
-    __pv2[0] *= __w / 10.f;
-    __pv2[1] += 5.f;
-    __pv2[1] *= __h / 10.f;
-    __pv3[0] += 5.f;
-    __pv3[0] *= __w / 10.f;
-    __pv3[1] += 5.f;
-    __pv3[1] *= __h / 10.f;
+    // // // simulating a frustrum
+    // // __pv1[0] += 5.f;
+    // // __pv1[0] *= __w / 10.f;
+    // // __pv1[1] += 5.f;
+    // // __pv1[1] *= __h / 10.f;
+    // // __pv2[0] += 5.f;
+    // // __pv2[0] *= __w / 10.f;
+    // // __pv2[1] += 5.f;
+    // // __pv2[1] *= __h / 10.f;
+    // // __pv3[0] += 5.f;
+    // // __pv3[0] *= __w / 10.f;
+    // // __pv3[1] += 5.f;
+    // // __pv3[1] *= __h / 10.f;
 
-    v1=__pv1;
-    v2=__pv2;
-    v3=__pv3;
+
+    float ar = 600 / 400;
+    float zNear = 1;
+    float zFar =  400;
+    float zRange = zNear - zFar;
+    float tanHalfFOV = tanf(3.14*(__camera->fovy() / 2.0)/180);
+    float f = __camera->fovy();
+
+    matrix<4, 4> __ww2;
+    __ww2[0][0] = 1.0f / (tanHalfFOV * ar);
+    __ww2[0][1] = 0.0f;
+    __ww2[0][2] = 0.0f;
+    __ww2[0][3] = 0.0f;
+
+    __ww2[1][0] = 0.0f;
+    __ww2[1][1] = 1.0f / tanHalfFOV; 
+    __ww2[1][2] = 0.0f;
+    __ww2[1][3] = 0.0f;
+
+    __ww2[2][0] = 0.0f;
+    __ww2[2][1] = 0.0f;
+    __ww2[2][2] = (-zNear - zFar) / zRange;
+    __ww2[2][3] = 2.0f * zFar * zNear / zRange;
+
+    __ww2[3][0] = 0.0f;
+    __ww2[3][1] = 0.0f;
+    __ww2[3][2] = 1.0f;
+    __ww2[3][3] = 0.0f;
 
     
-    // draw_point(__pv1, __w, __h, __color_buffer);
-    // draw_point(__pv2, __w, __h, __color_buffer);
-    // draw_point(__pv3, __w, __h, __color_buffer);
-     
-    // RELLENAR AQUI BRESENHAM para trazar
-    // las lineas entre los puntos __pv1, __pv2 y __pv3
-    // cout<<"bresenham pv1"<<endl;
-    // bresenham(__pv1,__pv2,__w, __h, __color_buffer);
-    // // Esto es: trazar la linea entre __pv1 y __pv2,
-    // cout<<"bresenham pv2"<<endl;
-    // bresenham(__pv2,__pv3,__w, __h, __color_buffer);
-    // // entre __pv1 y __pv3; y entre __pv2 y __pv3
-    // cout<<"bresenham pv3"<<endl;
-    // bresenham(__pv3,__pv1,__w, __h, __color_buffer);
+        cout<<endl;
+        cout<<" matrix"<<endl;
+        for (int i=0;i<4;i++){
+            for(int j=0;j<4;j++)
+            cout<<__ww2[i][j]<<" ";
+            cout<<endl;
+        }
+        vector<4> vv11;
+        vv11=__ww2*__v1;
+        vector<4> vv22;
+        vv22=__ww2*__v2;
+        vector<4> vv33;
+        vv33=__ww2*__v3;
 
-    cout<<"*************************************"<<endl;
-    cout<<"p1: "<<v1[0]<<" - "<<v1[1]<<endl;    
-    cout<<"p2: "<<v2[0]<<" - "<<v2[1]<<endl;    
-    cout<<"p3: "<<v3[0]<<" - "<<v3[1]<<endl;    
-    cout<<"*************************************"<<endl;
+        for (int j = 0; j < 4; j++)
+            cout << vv11[j] << " ";
+        cout<<endl;
+        for (int j = 0; j < 4; j++)
+            cout << vv22[j] << " ";
+        cout<<endl;
+        for (int j = 0; j < 4; j++)
+            cout << vv33[j] << " ";
+        cout<<endl;
 
-    area = abs(dist(v1, v2) * dist(v1, v2)) / 2;
-
-    draw_polygon(v1,v2,v3,__w, __h, __color_buffer);
         
-            
-          
+        /* ****puntos *** */
+        // f=vv11[2]-__camera->pos()[2];
+        v1[0] = vv11[0]*(f/vv11[2]);
+        v1[1] = vv11[1]*(f/vv11[2]);
+        
+        // f=vv22[2]-__camera->pos()[2];
+        v2[0] = vv22[0] * (f / vv22[2]);
+        v2[1] = vv22[1] * (f / vv22[2]);
 
-    // everything is alright
-    return true;
+        // f=vv33[2]-__camera->pos()[2];
+        v3[0] = vv33[0] * (f / vv33[2]);
+        v3[1] = vv33[1] * (f / vv33[2]);
+
+        // v1[0] += 5.f;
+        // v1[0] *= __w / 10.f;
+        // v1[1] += 5.f;
+        // v1[1] *= __h / 10.f;
+        // v2[0] += 5.f;
+        // v2[0] *= __w / 10.f;
+        // v2[1] += 5.f;
+        // v2[1] *= __h / 10.f;
+        // v3[0] += 5.f;
+        // v3[0] *= __w / 10.f;
+        // v3[1] += 5.f;
+        // v3[1] *= __h / 10.f;
+
+        // draw_point(__pv1, __w, __h, __color_buffer);
+        // draw_point(__pv2, __w, __h, __color_buffer);
+        // draw_point(__pv3, __w, __h, __color_buffer);
+
+        // RELLENAR AQUI BRESENHAM para trazar
+        // las lineas entre los puntos __pv1, __pv2 y __pv3
+        // cout<<"bresenham pv1"<<endl;
+        // bresenham(__pv1,__pv2,__w, __h, __color_buffer);
+        // // Esto es: trazar la linea entre __pv1 y __pv2,
+        // cout<<"bresenham pv2"<<endl;
+        // bresenham(__pv2,__pv3,__w, __h, __color_buffer);
+        // // entre __pv1 y __pv3; y entre __pv2 y __pv3
+        // cout<<"bresenham pv3"<<endl;
+        // bresenham(__pv3,__pv1,__w, __h, __color_buffer);
+
+        // cout<<"*************************************"<<endl;
+        // cout<<"p1: "<<v1[0]<<" - "<<v1[1]<<endl;
+        // cout<<"p2: "<<v2[0]<<" - "<<v2[1]<<endl;
+        // cout<<"p3: "<<v3[0]<<" - "<<v3[1]<<endl;
+        // cout<<"*************************************"<<endl;
+
+        area = abs(dist(v1, v2) * dist(v1, v2)) / 2;
+
+        draw_polygon(v1, v2, v3, __w, __h, __color_buffer);
+
+        // everything is alright
+        return true;
 }
 float triangle::dist(vector<2> p1, vector<2> p2)
 {
@@ -225,7 +312,6 @@ void triangle::bresenham(vector<2> pv1, vector<2> pv2,unsigned int __w, unsigned
         draw_point(pv1, __w, __h, __color_buffer);
         }
     }
-    
 }
 
 
