@@ -25,7 +25,6 @@ public:
     void draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned int __w, unsigned int __h, float*& __color_buffer);
 
     void clipping(vector<2> &__pv1, vector<2> &__pv2);
-    void interseccion(vector<2> &__pv1);
     int code(vector<2> __pv1);
     float dist(vector<2> p1, vector<2> p2);
 

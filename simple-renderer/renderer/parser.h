@@ -9,11 +9,15 @@
 #include "transformation.h"
 #include <map>
 #include "triangle.h"			// triangle
+#include <list>
 // [->> 
 //  add include files for other objects
 // <<-]
 
 //! parser (all changes here)
+
+
+
 class parser {
 public:
     //! define pointer to function type
@@ -350,7 +354,95 @@ private:
         return true;
     }
 
-//->>  LIGHTS
+    static bool file(engine &__rt, std::ifstream &__ifile)
+    {
+        // read next word
+        std::string __slinel, dir;
+        __ifile >> __slinel;
+        if (__slinel != "name")
+        {
+            __sline = "token name expected";
+            return false;
+        }
+
+        __ifile >> dir;
+
+        material __material;
+        vector<3> __v1, __v2, __v3;
+
+        float *_array;
+        int n;
+
+
+        ifstream file;
+        list<float> vect;
+        std::string word;
+
+        file.open("./data/couch2.obj");
+        while (file >> word)
+        {
+            vect.push_back(stof(word));
+        }
+        n = vect.size();
+        _array = new float[n];
+
+        for (int i = 0; i < 2; i++)
+        {
+            _array[i] = vect.front();
+            vect.pop_front();
+        }
+
+        // get atribute
+        for (register unsigned short __i = 0; __i < n; __i++)
+        {
+        std::cout<<"parse:"<<_array[0];
+        __v1[0]=_array[i];
+        __v1[1]=_array[i+1];
+        __v1[2]=_array[i+2];
+
+        __v2[0]=_array[i+3];
+        __v2[1]=_array[i+4];
+        __v2[2]=_array[i+5];
+
+        __v3[0]=_array[i+6];
+        __v3[1]=_array[i+7];
+        __v3[2]=_array[i+8];
+
+        __material._refractive=0.0;
+        __material._reflective=0.3;
+        __material._shininness=45;
+        __material._ior=1.05;
+        __material._color[0]=1.0;
+        __material._color[1]=1.0;
+        __material._color[2]=1.0;
+        __material._color[3] = 1.f; // opaque
+            
+        
+        // transformations
+        transformation __last;
+        _transformations.top(__last);
+
+        // new triangle
+        matrix<4, 4> __temp = __last.t();
+        triangle *__triangle = new triangle(__temp, __material, __v1, __v2, __v3);
+
+        // add object
+        __rt.add_object((object *)__triangle);
+        }
+        
+        // read next word
+        __ifile >> __slinel;
+        if (__slinel != "[/file]")
+        {
+            __sline = "token [/file] expected";
+            return false;
+        }
+
+        // success
+        return true;
+    }
+
+    //->>  LIGHTS
 
     //! read light
     static bool ambient(engine& __rt, std::ifstream& __ifile) {
@@ -548,6 +640,7 @@ public:
         _trans_funcs["scale"] = &scale;
 
         _head_funcs["[transformation]"] = &trans;
+        _head_funcs["[file]"] = &file;
         _head_funcs["[/transformation]"] = &transend;
         _head_funcs["[object]"] = &obj;
         _head_funcs["[light]"] = &lit;
