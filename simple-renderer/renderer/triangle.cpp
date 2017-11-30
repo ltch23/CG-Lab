@@ -1,9 +1,17 @@
 #include "triangle.h"
 #include <utility>
 // constructor
-
-
-
+#define TOOL 9;  // =  1001 
+#define TOOO 8;  // =  1000 
+#define TORO 10; // =  1010 
+#define OOOL 1;  // =  0001 
+#define OOOO 0;  // =  0000 
+#define OORO 2;  // =  0010 
+#define OBOL 5;  // =  0101 
+#define OBOO 4;  // =  0100 
+#define OBRO 6;  // =  0110 
+#define width 600
+#define height 400
 
 triangle::triangle(matrix<4, 4>& __t, material &__material, vector<3> __v1, vector<3> __v2,
         vector<3> __v3) :
@@ -96,13 +104,13 @@ bool triangle::rasterize(camera* __camera, unsigned short __w, unsigned short __
     // RELLENAR AQUI BRESENHAM para trazar
     // las lineas entre los puntos __pv1, __pv2 y __pv3
     // cout<<"bresenham pv1"<<endl;
-    bresenham(__pv1,__pv2,__w, __h, __color_buffer);
-    // Esto es: trazar la linea entre __pv1 y __pv2,
-    cout<<"bresenham pv2"<<endl;
-    bresenham(__pv2,__pv3,__w, __h, __color_buffer);
-    // entre __pv1 y __pv3; y entre __pv2 y __pv3
-    cout<<"bresenham pv3"<<endl;
-    bresenham(__pv3,__pv1,__w, __h, __color_buffer);
+    // bresenham(__pv1,__pv2,__w, __h, __color_buffer);
+    // // Esto es: trazar la linea entre __pv1 y __pv2,
+    // cout<<"bresenham pv2"<<endl;
+    // bresenham(__pv2,__pv3,__w, __h, __color_buffer);
+    // // entre __pv1 y __pv3; y entre __pv2 y __pv3
+    // cout<<"bresenham pv3"<<endl;
+    // bresenham(__pv3,__pv1,__w, __h, __color_buffer);
 
     cout<<"*************************************"<<endl;
     cout<<"p1: "<<__pv1[0]<<" - "<<__pv1[1]<<endl;    
@@ -246,17 +254,14 @@ void triangle::draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned in
             y2=p[i+1][1];
             if(y2<y1)
             {
-                temp=x1;
-                x1=x2;
-                x2=temp;
-                temp=y1;
-                y1=y2;
-                y2=temp;
+                swap(x1,x2);
+                swap(y1,y2);
+
             }
             if(z<=y2&&z>=y1)
             {
                 if((y1-y2)==0)
-                x=x1;
+                     x=x1;
                 else{ // used to make changes in x. so that we can fill our polygon after cerain distance
                     x=((x2-x1)*(z-y1))/(y2-y1);
                     x=x+x1;
@@ -275,14 +280,94 @@ void triangle::draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned in
 
         cout<<endl;
         for(int i=0; i<c;i+=2){
-            for(int j=inter[i];j<=inter[i+1];j++){
-                cout<<"x: "<<j<<", "<<int(z)<<endl;
-                p1[0]=j;
-                p1[1]=int(z);
-                draw_point(p1, __w, __h, __color_buffer);
-                
+            vector<2> p1;
+            vector<2> p2;
+            p1[0] = inter[i];
+            p2[0] = inter[i+1];
+            p1[1]=p2[1]=int(z);
+
+            clipping(p1,p2);
+            bresenham(p1,p2,__w,__h,__color_buffer);
+            }
+        z++;
+        }
+    }
+    
+    int triangle::code(vector<2> __pv1)
+    {
+        int a = 0;
+        if (__pv1[1] <= 0){
+            //RIGHT
+            if (__pv1[0] >= width){
+                a = TORO;
+            }
+            else if (__pv1[0] <= 0){
+                //LEFT
+                a = TOOL;
+            }
+            else{
+                //CENTER
+                a = TOOO;
             }
         }
-        z++; 
+        else if (__pv1[1] >= height){
+            if (__pv1[0] >= width){
+                a = OBRO;
+            }
+            else if (__pv1[0] <= 0){
+                //LEFT
+                a = OBOL;
+            }
+            else{
+                //CENTER
+                a = OBOO;
+            }
+        }
+        else{
+            //CENTER
+            if (__pv1[0] >= width){
+                a = OORO;
+            }
+            else if (__pv1[0] <= 0){
+                //LEFT
+                a = OOOL;
+            }
+            else{
+                //CENTER
+                a = OOOO;
+            }
+        }
+        return a;
     }
+    
+    int triangle::interseccion(vector<2> &__pv1)
+    {
+
+        if (__pv1[0] >= width){
+            __pv1[0] = width - 1;
+        }
+        else if (__pv1[0] <= 0){
+            __pv1[0] = 1;
+        }
+        if (__pv1[1] >= height){
+            __pv1[1] = height - 1;
+        }
+        else if (__pv1[1] <= 0){
+            __pv1[1] = 1;
+        }
+    }
+
+    void triangle::clipping(vector<2> &__pv1, vector<2> &__pv2)
+    {
+        // int a = code(__pv1);
+        // // //std::cout << "a " <<a<< '\n';
+        // int b = code(__pv2);
+        // // //std::cout << "b " <<b<< '\n';
+        // // int c = a & b;
+        // // //CASO 1
+        // //SE ACEPTA COMPLETO
+        // if (a & b > 0) {
+        interseccion(__pv1);
+        interseccion(__pv2);
+        //  }
     }

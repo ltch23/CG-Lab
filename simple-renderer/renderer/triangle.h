@@ -23,11 +23,14 @@ public:
     void draw_point(vector<2> p, unsigned int __w, unsigned int __h, float*& __color_buffer);
     void bresenham(vector<2> pv1, vector<2> pv2,unsigned int __w, unsigned int __h, float*& __color_buffer);
     void draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned int __w, unsigned int __h, float*& __color_buffer);
-        
-    
-protected:
-    //! vertex 1
-    vector<3> _v1;
+
+    void clipping(vector<2> &__pv1, vector<2> &__pv2);
+    int interseccion(vector<2> &__pv1);
+    int code(vector<2> __pv1);
+
+        protected :
+        //! vertex 1
+        vector<3> _v1;
 
     //! vertex 2
     vector<3> _v2;
