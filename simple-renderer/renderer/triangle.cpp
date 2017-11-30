@@ -96,6 +96,10 @@ bool triangle::rasterize(camera* __camera, unsigned short __w, unsigned short __
     __pv3[1] += 5.f;
     __pv3[1] *= __h / 10.f;
 
+    v1=__pv1;
+    v2=__pv2;
+    v3=__pv3;
+
     
     // draw_point(__pv1, __w, __h, __color_buffer);
     // draw_point(__pv2, __w, __h, __color_buffer);
@@ -113,13 +117,14 @@ bool triangle::rasterize(camera* __camera, unsigned short __w, unsigned short __
     // bresenham(__pv3,__pv1,__w, __h, __color_buffer);
 
     cout<<"*************************************"<<endl;
-    cout<<"p1: "<<__pv1[0]<<" - "<<__pv1[1]<<endl;    
-    cout<<"p2: "<<__pv2[0]<<" - "<<__pv2[1]<<endl;    
-    cout<<"p3: "<<__pv3[0]<<" - "<<__pv3[1]<<endl;    
+    cout<<"p1: "<<v1[0]<<" - "<<v1[1]<<endl;    
+    cout<<"p2: "<<v2[0]<<" - "<<v2[1]<<endl;    
+    cout<<"p3: "<<v3[0]<<" - "<<v3[1]<<endl;    
     cout<<"*************************************"<<endl;
 
-    draw_polygon(__pv1,__pv2,__pv3,__w, __h, __color_buffer);
-    // scan_line( __pv1,__pv2,__pv3 ,__w,  __h, __color_buffer);
+    area = abs(dist(v1, v2) * dist(v1, v2)) / 2;
+
+    draw_polygon(v1,v2,v3,__w, __h, __color_buffer);
         
             
           
@@ -127,19 +132,38 @@ bool triangle::rasterize(camera* __camera, unsigned short __w, unsigned short __
     // everything is alright
     return true;
 }
-
-void triangle::draw_point(vector<2> p, unsigned int __w, unsigned int __h, float*& __color_buffer) {
-    int __x = p[0];
-    int __y = p[1];
-    // cout<<"x: "<<__x<<" y: "<<__y<<endl;
-    __color_buffer[(__y * __w + __x) * 4 + 0] = _material._color[0];
-    __color_buffer[(__y * __w + __x) * 4 + 1] = _material._color[1];
-    __color_buffer[(__y * __w + __x) * 4 + 2] = _material._color[2];
-    __color_buffer[(__y * __w + __x) * 4 + 3] = _material._color[3];
+float triangle::dist(vector<2> p1, vector<2> p2)
+{
+    return sqrt(pow(p2[0] - p1[0], 2) + pow(p2[1] - p1[1], 2));
 }
 
+void triangle::draw_point(vector<2> p, unsigned int __w, unsigned int __h, float *&_color_buffer)
+{
+    // cout<<"DRAW POINT"<<endl;
 
+    int __x = p[0];
+    int __y = p[1];
 
+    float a, b, c;
+    float R, G, B;
+
+    float area_a = abs(dist(v1, v3) * dist(p, v1)) / 2;
+    float area_b = abs(dist(v3, v2) * dist(p, v2)) / 2;
+    float area_c = abs(dist(v2, v1) * dist(p, v3)) / 2;
+
+    a = area_a / area;
+    b = area_b / area;
+    c = area_c / area;
+
+    R = a * _material._color[0];
+    G = b * _material._color[1];
+    B = c * _material._color[2];
+
+    _color_buffer[(__y * __w + __x) * 4 + 0] = R;
+    _color_buffer[(__y * __w + __x) * 4 + 1] = G;
+    _color_buffer[(__y * __w + __x) * 4 + 2] = B;
+    _color_buffer[(__y * __w + __x) * 4 + 3] = _material._color[3];
+}
 
 void triangle::bresenham(vector<2> pv1, vector<2> pv2,unsigned int __w, unsigned int __h, float*& __color_buffer){
 
@@ -212,7 +236,7 @@ void triangle::draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned in
     
         
     int p[4][4];
-    int inter[4],x,y;
+    int inter[4],x;
     int xmin,ymin,xmax,ymax;
     
     p[0][0]=p1[0];
@@ -240,11 +264,11 @@ void triangle::draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned in
     }
     
     
-    float z=ymin+0.1;
+    float y=ymin+0.1;
 
-    while(z<=ymax){
+    while(y<=ymax){
 
-        int x1,x2,y1,y2,temp;
+        int x1,x2,y1,y2;
         int c=0;
         for(int i=0;i<3;i++)
         {
@@ -258,12 +282,12 @@ void triangle::draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned in
                 swap(y1,y2);
 
             }
-            if(z<=y2&&z>=y1)
+            if(y<=y2&&y>=y1)
             {
                 if((y1-y2)==0)
                      x=x1;
                 else{ // used to make changes in x. so that we can fill our polygon after cerain distance
-                    x=((x2-x1)*(z-y1))/(y2-y1);
+                    x=((x2-x1)*(y-y1))/(y2-y1);
                     x=x+x1;
                 }
                 if(x<=xmax && x>=xmin)
@@ -272,7 +296,6 @@ void triangle::draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned in
         }
 
         //SORT FUNCTION
-        int j,i;
 
         // for(i=0;i<3;i++){
         //     cout<<p[i][0]<<","<<p[i][1]<<"-"<<p[i+1][0]<<","<<p[i+1][1]<<endl;
@@ -284,12 +307,12 @@ void triangle::draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned in
             vector<2> p2;
             p1[0] = inter[i];
             p2[0] = inter[i+1];
-            p1[1]=p2[1]=int(z);
+            p1[1]=p2[1]=int(y);
 
             clipping(p1,p2);
             bresenham(p1,p2,__w,__h,__color_buffer);
             }
-        z++;
+        y++;
         }
     }
     
@@ -340,7 +363,7 @@ void triangle::draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned in
         return a;
     }
     
-    int triangle::interseccion(vector<2> &__pv1)
+    void  triangle::interseccion(vector<2> &__pv1)
     {
 
         if (__pv1[0] >= width){
@@ -355,6 +378,7 @@ void triangle::draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned in
         else if (__pv1[1] <= 0){
             __pv1[1] = 1;
         }
+
     }
 
     void triangle::clipping(vector<2> &__pv1, vector<2> &__pv2)

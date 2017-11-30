@@ -25,18 +25,27 @@ public:
     void draw_polygon(vector<2> p1, vector<2> p2, vector<2> p3,unsigned int __w, unsigned int __h, float*& __color_buffer);
 
     void clipping(vector<2> &__pv1, vector<2> &__pv2);
-    int interseccion(vector<2> &__pv1);
+    void interseccion(vector<2> &__pv1);
     int code(vector<2> __pv1);
+    float dist(vector<2> p1, vector<2> p2);
 
-        protected :
+    protected:
         //! vertex 1
-        vector<3> _v1;
+    vector<3> _v1;
 
     //! vertex 2
     vector<3> _v2;
 
     //! vertex 3
     vector<3> _v3;
+    
+    vector<2> v1;
+
+    vector<2> v2;
+
+    vector<2> v3;
+
+    float area;
 };
 
 #endif
